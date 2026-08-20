@@ -430,6 +430,7 @@
             <span class="col-tag">PROJETO</span>
             <span class="col-tag">SUPERVISOR</span>
             <span class="col-tag">ENCARREGADO</span>
+            <span class="col-tag">PLACA</span>
             <span class="col-tag">TITULO</span>
             <span class="col-tag">MUNICÍPIO</span>
             <span class="col-tag">ATIVIDADE PROGRAMADA</span>
@@ -478,13 +479,15 @@
             <table id="export-table">
               <thead>
                 <tr>
-                  <th>PROJETO</th>
+                  <th>DATA</th>
                   <th>LIDER</th>
                   <th>RESPONSÁVEL</th>
+                  <th>PLACA</th>
+                  <th>PROJETO</th>
                   <th>TITULO</th>
                   <th>MUNICÍPIO</th>
-                  <th>ATIVIDADE PROGRAMADA</th>
                   <th style="text-align:center;">CRITÉRIO</th>
+                  <th>ATIVIDADE PROGRAMADA</th>
                 </tr>
               </thead>
               <tbody id="export-table-body"></tbody>
@@ -537,6 +540,20 @@
 
     function formatDateLong(date) {
       return date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    }
+
+    // Converte a coluna DATA da planilha (pode vir como número serial do Excel
+    // ou como texto) para o formato dd/mm/aaaa exibido na tabela.
+    function formatRowDate(value) {
+      if (value === '' || value === null || value === undefined) return '';
+      if (typeof value === 'number' && window.XLSX && XLSX.SSF) {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (parsed) {
+          const d = new Date(parsed.y, parsed.m - 1, parsed.d);
+          return formatDateShort(d);
+        }
+      }
+      return String(value);
     }
 
     function showError(msg) {
@@ -652,7 +669,7 @@
           return;
         }
 
-        const requiredColumns = ['DATA', 'PROJETO', 'SUPERVISOR', 'ENCARREGADO', 'TITULO', 'MUNICIPIO', 'ATIVIDADE PROGRAMADA', 'CRITERIO'];
+        const requiredColumns = ['DATA', 'PROJETO', 'SUPERVISOR', 'ENCARREGADO', 'PLACA', 'TITULO', 'MUNICIPIO', 'ATIVIDADE PROGRAMADA', 'CRITERIO'];
         const firstRow = jsonData[0];
         const missing = requiredColumns.filter(col => !(col in firstRow));
 
@@ -700,15 +717,17 @@
         }
 
         tr.innerHTML = `
-          <td>${escHtml(row.PROJETO)}</td>
+          <td>${escHtml(formatRowDate(row.DATA))}</td>
           <td>${escHtml(row.SUPERVISOR)}</td>
           <td>${escHtml(row.ENCARREGADO)}</td>
+          <td>${escHtml(row.PLACA)}</td>
+          <td>${escHtml(row.PROJETO)}</td>
           <td>${escHtml(row.TITULO)}</td>
           <td>${escHtml(row.MUNICIPIO)}</td>
-          <td>${escHtml(row['ATIVIDADE PROGRAMADA'])}</td>
           <td style="text-align:center;">
             <span class="criterio-badge" style="${criterioStyle}">${escHtml(row.CRITERIO)}</span>
           </td>
+          <td>${escHtml(row['ATIVIDADE PROGRAMADA'])}</td>
         `;
         exportTableBody.appendChild(tr);
       });
