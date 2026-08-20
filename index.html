@@ -479,7 +479,6 @@
             <table id="export-table">
               <thead>
                 <tr>
-                  <th>DATA</th>
                   <th>LIDER</th>
                   <th>RESPONSÁVEL</th>
                   <th>PLACA</th>
@@ -540,20 +539,6 @@
 
     function formatDateLong(date) {
       return date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-    }
-
-    // Converte a coluna DATA da planilha (pode vir como número serial do Excel
-    // ou como texto) para o formato dd/mm/aaaa exibido na tabela.
-    function formatRowDate(value) {
-      if (value === '' || value === null || value === undefined) return '';
-      if (typeof value === 'number' && window.XLSX && XLSX.SSF) {
-        const parsed = XLSX.SSF.parse_date_code(value);
-        if (parsed) {
-          const d = new Date(parsed.y, parsed.m - 1, parsed.d);
-          return formatDateShort(d);
-        }
-      }
-      return String(value);
     }
 
     function showError(msg) {
@@ -717,7 +702,6 @@
         }
 
         tr.innerHTML = `
-          <td>${escHtml(formatRowDate(row.DATA))}</td>
           <td>${escHtml(row.SUPERVISOR)}</td>
           <td>${escHtml(row.ENCARREGADO)}</td>
           <td>${escHtml(row.PLACA)}</td>
